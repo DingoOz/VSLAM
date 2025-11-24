@@ -1,0 +1,22 @@
+version: '3.8'
+
+services:
+  pycuvslam_ros2:
+    build:
+      context: ..
+      dockerfile: docker/Dockerfile.aarch64
+    image: pycuvslam_ros2:aarch64
+    runtime: nvidia
+    environment:
+      - NVIDIA_VISIBLE_DEVICES=all
+      - NVIDIA_DRIVER_CAPABILITIES=all
+      - ROS_DOMAIN_ID=0
+    volumes:
+      - ../ros2_ws:/workspace/ros2_ws
+      - ../config:/workspace/config
+      - /dev:/dev
+    network_mode: host
+    privileged: true
+    stdin_open: true
+    tty: true
+    command: bash

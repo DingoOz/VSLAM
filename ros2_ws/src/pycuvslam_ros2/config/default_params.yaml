@@ -1,0 +1,21 @@
+pycuvslam_node:
+  ros__parameters:
+    # Camera topics
+    camera_topic: "/camera/image_raw"
+    camera_info_topic: "/camera/camera_info"
+
+    # VSLAM mode: mono, stereo, or rgbd
+    mode: "mono"
+
+    # Frame IDs
+    world_frame: "world"
+    camera_frame: "camera"
+
+    # Publishing options
+    publish_tf: true
+    publish_rate: 30.0
+
+    # Performance settings
+    enable_visualization: false  # Disable for better performance
+    enable_mapping: true
+    enable_loop_closure: true

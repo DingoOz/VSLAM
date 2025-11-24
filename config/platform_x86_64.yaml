@@ -1,0 +1,29 @@
+# Platform configuration for x86_64 (Intel with RTX3070)
+
+platform:
+  name: "x86_64"
+  architecture: "x86_64"
+  gpu: "NVIDIA RTX3070"
+
+system:
+  os: "Ubuntu 22.04"
+  cuda_version: "12.6"
+  python_version: "3.10"
+
+pycuvslam:
+  binary_path: "bin/x86_64"
+
+cuda:
+  cuda_home: "/usr/local/cuda-12.6"
+  compute_capability: "8.6"  # RTX3070 compute capability
+
+performance:
+  # RTX3070 has more power, can handle higher resolution and frame rates
+  max_resolution: "1920x1080"
+  target_fps: 60
+  enable_visualization: true  # Desktop can handle visualization
+  max_keyframes: 1000
+
+environment:
+  LD_LIBRARY_PATH: "/usr/local/cuda-12.6/lib64"
+  CUDA_VISIBLE_DEVICES: "0"

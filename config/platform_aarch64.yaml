@@ -1,0 +1,38 @@
+# Platform configuration for aarch64 (Jetson Orin Nano 8GB)
+
+platform:
+  name: "aarch64"
+  architecture: "aarch64"
+  gpu: "NVIDIA Jetson Orin Nano 8GB"
+
+system:
+  os: "Ubuntu 22.04"
+  jetpack_version: "6.1"
+  cuda_version: "12.6"
+  python_version: "3.10"
+
+pycuvslam:
+  binary_path: "bin/aarch64"
+
+cuda:
+  cuda_home: "/usr/local/cuda-12.6"
+  compute_capability: "8.7"  # Orin Nano compute capability
+
+performance:
+  # Jetson has limited resources, optimize for performance
+  max_resolution: "640x480"  # VGA for better performance
+  target_fps: 30
+  enable_visualization: false  # Disable visualization to reduce load
+  max_keyframes: 500
+
+memory:
+  # 8GB shared between CPU and GPU
+  gpu_memory_fraction: 0.6  # Reserve 60% for GPU
+
+power:
+  # Jetson power modes
+  power_mode: "MAXN"  # Maximum performance mode
+
+environment:
+  LD_LIBRARY_PATH: "/usr/local/cuda-12.6/lib64"
+  CUDA_VISIBLE_DEVICES: "0"

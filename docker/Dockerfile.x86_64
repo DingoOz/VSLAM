@@ -1,0 +1,83 @@
+# Dockerfile for x86_64 platform (Intel with RTX3070)
+FROM nvidia/cuda:12.6.0-devel-ubuntu22.04
+
+# Prevent interactive prompts during build
+ENV DEBIAN_FRONTEND=noninteractive
+ENV CUDA_HOME=/usr/local/cuda-12.6
+ENV LD_LIBRARY_PATH=${CUDA_HOME}/lib64:${LD_LIBRARY_PATH}
+ENV PATH=${CUDA_HOME}/bin:${PATH}
+
+# Install system dependencies
+RUN apt-get update && apt-get install -y \
+    git \
+    git-lfs \
+    python3.10 \
+    python3.10-venv \
+    python3-pip \
+    build-essential \
+    cmake \
+    wget \
+    curl \
+    software-properties-common \
+    && rm -rf /var/lib/apt/lists/*
+
+# Initialize git-lfs
+RUN git lfs install
+
+# Install ROS2 Humble
+RUN apt-get update && apt-get install -y \
+    locales \
+    && locale-gen en_US en_US.UTF-8 \
+    && update-locale LC_ALL=en_US.UTF-8 LANG=en_US.UTF-8
+ENV LANG=en_US.UTF-8
+
+RUN apt-get update && apt-get install -y \
+    software-properties-common \
+    && add-apt-repository universe
+
+RUN apt-get update && apt-get install -y \
+    curl \
+    gnupg \
+    lsb-release \
+    && curl -sSL https://raw.githubusercontent.com/ros/rosdistro/master/ros.key -o /usr/share/keyrings/ros-archive-keyring.gpg
+
+RUN echo "deb [arch=$(dpkg --print-architecture) signed-by=/usr/share/keyrings/ros-archive-keyring.gpg] http://packages.ros.org/ros2/ubuntu $(. /etc/os-release && echo $UBUNTU_CODENAME) main" | tee /etc/apt/sources.list.d/ros2.list > /dev/null
+
+RUN apt-get update && apt-get install -y \
+    ros-humble-desktop \
+    ros-humble-cv-bridge \
+    python3-colcon-common-extensions \
+    python3-rosdep \
+    && rm -rf /var/lib/apt/lists/*
+
+# Initialize rosdep
+RUN rosdep init || true && rosdep update
+
+# Set up workspace
+WORKDIR /workspace
+
+# Clone PyCuVSLAM
+RUN git clone https://github.com/NVlabs/PyCuVSLAM.git pycuvslam
+
+# Install PyCuVSLAM
+WORKDIR /workspace/pycuvslam
+RUN pip install -e bin/x86_64
+RUN pip install -r examples/requirements.txt || true
+
+# Install additional Python dependencies
+RUN pip install opencv-python numpy
+
+# Copy ROS2 workspace
+WORKDIR /workspace
+COPY ros2_ws /workspace/ros2_ws
+
+# Build ROS2 workspace
+WORKDIR /workspace/ros2_ws
+RUN . /opt/ros/humble/setup.sh && colcon build --symlink-install
+
+# Set up entrypoint
+COPY docker/entrypoint.sh /entrypoint.sh
+RUN chmod +x /entrypoint.sh
+
+ENTRYPOINT ["/entrypoint.sh"]
+CMD ["bash"]
